@@ -1,5 +1,6 @@
 const { ApolloServer } = require('@apollo/server')
 const { startStandaloneServer } = require('@apollo/server/standalone')
+const { v1: uuid } = require('uuid')
 
 let authors = [
   {
@@ -26,19 +27,6 @@ let authors = [
     id: "afa5b6f3-344d-11e9-a414-719c6709cf3e",
   },
 ]
-
-/*
- * Suomi:
- * Saattaisi olla järkevämpää assosioida kirja ja sen tekijä tallettamalla kirjan 
- * yhteyteen tekijän nimen sijaan tekijän id
- * Yksinkertaisuuden vuoksi tallennamme kuitenkin kirjan yhteyteen tekijän nimen
- *
- * English:
- * It might make more sense to associate a book with its author by storing the author's 
- * id in the context of the book instead of the author's name
- * However, for simplicity, we will store the author's name in connection with the book
- *
-*/
 
 let books = [
   {
@@ -106,7 +94,7 @@ const typeDefs = `
     title: String!
     published: Int!
     author: String!
-    id: ID!
+    id: ID
     genres: [String!]!
   }
 
@@ -115,6 +103,16 @@ const typeDefs = `
     authorCount: Int!
     allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
+  }
+
+  type Mutation {
+    addBook(
+        title: String!
+        published: Int!
+        author: String!
+        id: ID
+        genres: [String!]!
+    ): Book
   }
 `
 
@@ -129,6 +127,7 @@ const resolvers = {
         if (args.genre) {
             return books.filter(book => book.genres.includes(args.genre))
         }
+        return books
     },
     allAuthors: () => {
         return authors.map(author => {
@@ -138,6 +137,13 @@ const resolvers = {
               bookCount
             }
           })
+    }
+  },
+  Mutation: {
+    addBook: (root, args) => {
+        book = {...args, id: uuid()}
+        books =  books.concat(args)
+        return book
     }
   }
 }
