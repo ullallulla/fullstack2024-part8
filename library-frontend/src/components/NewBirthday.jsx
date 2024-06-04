@@ -17,22 +17,24 @@ const NewBirthday = ( { authors } ) => {
     const submit = (event) => {
         event.preventDefault()
         const birthYearInt = Number(birthYear) 
-        console.log(name, birthYear)
         updateAuthor({variables: {name, birthYear: birthYearInt}})
         setName('')
         setBirthYear('')
     }
     return (
         <div>
+            <h2>Set birthyear</h2>
             <form onSubmit={submit}>
-                <select onChange={({target}) => setName(target.value)}>
+                <select value={name} onChange={({target}) => setName(target.value)}>
+                    <option>Select Author</option>
                     {authors.map(author => 
                             <option key={author.name} value={author.name} >
                                 {author.name}
                             </option>
                     )}
                 </select>
-                <input type="number" value={birthYear} onChange={({target}) => setBirthYear(target.value)}/>
+                <br />
+                born <input type="number" value={birthYear} onChange={({target}) => setBirthYear(target.value)}/>
                 <button type="submit">update author</button>
             </form>
         </div>
