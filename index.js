@@ -85,7 +85,7 @@ let books = [
 const typeDefs = `
   type Author {
     name: String!,
-    id: ID!
+    id: ID
     born: Int
     bookCount: Int!
   }
@@ -146,6 +146,9 @@ const resolvers = {
   },
   Mutation: {
     addBook: (root, args) => {
+        if (!authors.find(author => author.name === args.author)) {
+          authors = authors.concat({name: args.author})
+        }
         book = {...args, id: uuid()}
         books =  books.concat(book)
         return book
