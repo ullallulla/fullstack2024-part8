@@ -1,6 +1,6 @@
 const { ApolloServer } = require('@apollo/server')
 const { startStandaloneServer } = require('@apollo/server/standalone')
-const { v1: uuid } = require('uuid')
+const { GraphQLError } = require('graphql')
 
 const mongoose = require('mongoose')
 const Book = require('./models/book')
@@ -96,7 +96,17 @@ const resolvers = {
         let author = await Author.findOne({name: args.author})
         if (!author) {
           author = new Author({name: args.author})
-          await author.save()
+          try {
+            await author.save()
+          } catch (error) {
+            throw new GraphQLError('Author name too short, needs at least 4 characters', {
+              extensions: {
+                code: 'BAD_USER_INPUT',
+                invalidArgs: args.author,
+                error
+              }
+            })
+          }
         }
         
         const book = new Book({
@@ -106,7 +116,18 @@ const resolvers = {
           genres:args.genres
         })
 
-        return book.save()
+        try {
+          await book.save()
+        } catch (error) {
+          throw new GraphQLError('Title too short, needs at least 5 characters', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              invalidArgs: args.title,
+              error
+            }
+          })
+        }
+        return book
     },
     editAuthor: async (root, args) => {
         let author = await Author.findOne({name: args.name})
@@ -118,6 +139,18 @@ const resolvers = {
     }
   }
 }
+
+// try {
+//   await person.save()
+// } catch (error) {
+//   throw new GraphQLError('Saving number failed', {
+//     extensions: {
+//       code: 'BAD_USER_INPUT',
+//       invalidArgs: args.name,
+//       error
+//     }
+//   })
+// }
 
 const server = new ApolloServer({
   typeDefs,
