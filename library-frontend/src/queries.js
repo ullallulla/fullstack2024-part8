@@ -5,7 +5,9 @@ export const ALL_BOOKS = gql`
         allBooks(author: $authorToSearch, genre: $genreToSearch) {
             title
             published
-            author
+            author {
+                name
+            }
             genres
         }
     }
