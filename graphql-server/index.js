@@ -201,7 +201,6 @@ const resolvers = {
     },
     login: async (root, args) => {
       const user = await User.findOne({username: args.username})
-
       if (args.password !== 'salis') {
         throw new GraphQLError('wrong credentials', {
           extensions: {
