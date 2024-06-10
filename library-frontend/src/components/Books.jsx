@@ -3,28 +3,28 @@ import { ALL_BOOKS } from "../queries"
 import { useState } from "react"
 
 const Books = (props) => {
-  const [genre, setGenre] = useState(null)
+  const [genreToSearch, setGenreToSearch] = useState(null)
   const result = useQuery(ALL_BOOKS)
-
-  if (result.loading)  {
+  const book_result = useQuery(ALL_BOOKS, {
+    variables: { genreToSearch },
+  })
+  if (result.loading || book_result.loading)  {
     return <div>loading...</div>
   }
 
   if (!props.show) {
     return null
   }
-
   const books = result.data.allBooks
-
   const allGenres = books.flatMap(book => book.genres)
   const filteredGenres = allGenres.filter((genre, index) => {
     return allGenres.indexOf(genre) === index
-  })
+  }) 
 
   return (
     <div>
       <h2>books</h2>
-      in genre <strong>{genre}</strong>
+      in genre <strong>{genreToSearch}</strong>
       <table>
         <tbody>
           <tr>
@@ -32,7 +32,7 @@ const Books = (props) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {books.filter((book) => genre === null || book.genres.includes(genre)).map((a) => (
+          {book_result.data.allBooks.map((a) => (
             <tr key={a.title}>
               <td>{a.title}</td>
               <td>{a.author.name}</td>
@@ -43,9 +43,9 @@ const Books = (props) => {
       </table>
       <div>
       {filteredGenres.map((genre) => (
-        <button key={genre} onClick={() => setGenre(genre)}>{genre}</button>
+        <button key={genre} onClick={() => setGenreToSearch(genre)}>{genre}</button>
       ))}
-      <button onClick={() => setGenre(null)}>all genres</button>
+      <button onClick={() => setGenreToSearch(null)}>all genres</button>
       </div>
     </div>
   )
