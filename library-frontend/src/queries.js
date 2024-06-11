@@ -6,7 +6,6 @@ const BOOK_DETAILS = gql`
         title
         author {
             name
-            born
         }
         published
         genres
