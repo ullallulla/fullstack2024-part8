@@ -33,7 +33,7 @@ const App = () => {
     onData: ({ data, client }) => {
       const addedBook = data.data.bookAdded
       window.alert(`Book "${addedBook.title}" by ${addedBook.author.name} added.`)
-  
+      console.log(data, 'data from subs')
       updateCache(client.cache, {query: ALL_BOOKS}, addedBook)
       updateCache(client.cache, {query: ALL_BOOKS, variables: {genreToSearch: null}}, addedBook)
     }

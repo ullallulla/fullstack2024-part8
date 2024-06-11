@@ -32,11 +32,16 @@ const resolvers = {
         return Book.find(book).populate('author', { name: 1, born: 1, bookCount: 1 });
       },
       allAuthors: async () => {
+        console.log('Author.find')
           const authors = await Author.find({})
-          return await Promise.all(authors.map( async (author) => {
-              const bookCount = await Book.countDocuments({author: authors[0]._id}).count().exec() 
-              return {...author.toObject(), bookCount}
-            }))
+          console.log(authors, 'authors')
+          return authors
+          // return await Promise.all(authors.map( async (author) => {
+          //   console.log('Book.find')
+          //     const bookCount = await Book.countDocuments({author: author._id}).count().exec() 
+          //     console.log({...author.toObject(), bookCount})
+          //     return {...author.toObject(), bookCount}
+          //   }))
       },
       me: async (root, args, context) => {
         return context.currentUser
@@ -55,9 +60,12 @@ const resolvers = {
           }
           let author = await Author.findOne({name: args.author})
           if (!author) {
+            console.log('Creating new author')
             author = new Author({name: args.author})
+            console.log(author, 'new author before save')
             try {
               await author.save()
+              console.log(author, 'new author after save')
             } catch (error) {
               throw new GraphQLError('Author name too short, needs at least 4 characters', {
                 extensions: {
@@ -75,7 +83,11 @@ const resolvers = {
             author: author,
             genres:args.genres
           })
-  
+          console.log(book, 'this is book')
+          const books = author.books.concat(book._id)
+          console.log(author, 'author before updating books')
+          const updatedAuthor = await Author.findOneAndUpdate({name: args.name}, {books: books})
+          console.log(updatedAuthor, 'author after updating books')
           try {
             await book.save()
           } catch (error) {
